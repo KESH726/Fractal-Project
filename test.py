@@ -17,27 +17,24 @@ label.place(relx=0.5, rely=0.3, anchor = "n")
 
 
 #creates another empty window 
+
 def click_window():
-    new_window = ctk.CTk()
-    new_window.geometry("960x600")
-    name2 = new_window.title("test")
-    
-    frame_2 = ctk.CTkFrame(master=new_window)
-    frame_2.pack(pady=20, padx=60, fill="both", expand = True)
+    pygame.init()
     
     root.destroy() #destroys old window(root)
-
-    label = ctk.CTkLabel(master = new_window, text = "adjust how big the graph is", font = ("Aerial", 20))
-    label.place(relx = 0.1, rely = 0.85, anchor = "sw")
     
+    SCREEN_WIDTH = 800
+    SCREEN_HEIGHT = 600
     
-    def slider(value):
-        print(value)
-    slider_1 = ctk.CTkSlider(master = new_window, from_=0, to=100, command = slider)
-    slider_1.place(relx = 0.1, rely = 0.9, anchor = "sw")
-    
-    
-    new_window.mainloop()
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    run = True
+    while run:
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+        pygame.display.update()
+pygame.quit()
     
 
 btn1 = ctk.CTkButton(master=frame, text = "Start", command=click_window)
