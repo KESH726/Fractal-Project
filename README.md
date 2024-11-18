@@ -18,17 +18,25 @@ python -m unittest -v tests.[module_name]
 For more about this click on this tutorial : [Unittest docs](https://docs.python.org/3/library/unittest.html)
 
 
-## Resources
-(Xie, Allaire, and Grolemund 2018)
+[//]: # (## Resources)
 
-<div id="refs" class="references csl-bib-body hanging-indent">
+[//]: # (&#40;Xie, Allaire, and Grolemund 2018&#41;)
 
-<div id="ref-xie2018" class="csl-entry">
+[//]: # ()
+[//]: # (<div id="refs" class="references csl-bib-body hanging-indent">)
 
-Xie, Yihui, J. J. Allaire, and Garrett Grolemund. 2018. *R Markdown: The
-Definitive Guide*. Boca Raton, Florida: Chapman; Hall/CRC.
-<https://bookdown.org/yihui/rmarkdown>.
+[//]: # ()
+[//]: # (<div id="ref-xie2018" class="csl-entry">)
 
-</div>
+[//]: # ()
+[//]: # (Xie, Yihui, J. J. Allaire, and Garrett Grolemund. 2018. *R Markdown: The)
 
-</div>
+[//]: # (Definitive Guide*. Boca Raton, Florida: Chapman; Hall/CRC.)
+
+[//]: # (<https://bookdown.org/yihui/rmarkdown>.)
+
+[//]: # ()
+[//]: # (</div>)
+
+[//]: # ()
+[//]: # (</div>)
