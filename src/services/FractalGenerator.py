@@ -2,33 +2,46 @@
 '''
 <h1>FractalGenerator</h1>
 This class is responsible to generate coordinates of fractals using recursion and fractal formulas.
+The data structure is binary tree
+
 @:param x : value of the real number
 @:param i : value of the imaginary number
+@:param max_iteration iteration count for the fractal generation
+@:param recursion_limit the limit of the fractal tree
+@:param fractal_coord; it is the content of the generated fractal coord ; eatch fractal coord represents each node of
+the binary tree also each fractal coord represents whole fractal
 '''
+from src.services.DendriteFractal import DendriteFractal
+
+
 class FractalGenerator:
-    def __init__(self,x, i,max_iteration = 500):
-        self.x = x
-        self.i = i
-        self.max_iteration = max_iteration
+    def __init__(self,x = -1.188, i = 0.305,max_iteration = 500,recursion_limit = 5,fractal_coord = None):
+        self.recursion_limit = recursion_limit
+        self.fractal_generator = DendriteFractal(x,i, max_iteration)
+        self.left = None
+        self.right = None
+        self.fractal_coord = fractal_coord
 
     def set_max_iteration(self, max_iteration):
         self.max_iteration = max_iteration
 
-    def generate_julia_set(self,max_iteration, escape_radius):
-        x = np.linspace(x_min, x_max, width)
-        y = np.linspace(y_min, y_max, height)
-        zx, zy = np.meshgrid(x, y)
+    def _add_new_fractal_coord(self, fractal_coord):
+        self.fractal_coord = fractal_coord
 
-        c = complex(self.x, self.i)
-        z = zx + 1j * zy
-        fractal = np.zeros(z.shape, dtype=int)
-
-        for i in range(max_iteration):
-            mask = np.abs(z) < escape_radius
-            z[mask] = z[mask]**2 + c
-            fractal[mask] = i
-
-        return fractal
+    def generate_fractal_tree(self):
+        for x in range(self.recursion_limit):
+            self._add_new_fractal_coord(self.fractal_generator.generate_julia_set())
 
 
+    def get_fractal_coord_tree_as_json(self):
+        pass
 
+    def get_fractal_coord_tree_as_obj(self):
+        pass
+
+    '''
+    Since the recursion has limit we need to make sure that there are a specific amount of recursion happening based on the limit. 
+    So each time we need more recursion we could always generate further that would further append more node to the existing binary tree
+    '''
+    def generate_further(self):
+        pass
