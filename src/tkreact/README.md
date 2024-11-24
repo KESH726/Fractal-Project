@@ -1,11 +1,17 @@
 # tkreact tutorial
 
-This is a small library built on top of CTkinter. The main purpose is to abstract away some tkinter stuff and making it easy to keep a project organised. 
+This is a small library built on top of CustomTkinter. The main purpose is to abstract away some tkinter stuff and make it easy to keep a project organised. 
 
 Features
 * Page transitions
 * Components (with props)
 * Global state
+
+Bonus
+* Simplified event handling
+* Components can be passed as props to other components
+* Modular approach
+* Less boilerplate
 
 How to use:
 * create_app - takes 5 arguments: title, window size, appearance mode, theme, homepage
