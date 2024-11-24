@@ -1,6 +1,6 @@
 # tkreact tutorial
 
-Small library that I decided to write to abstract away some tkinter stuff.
+This is a small library built on top of CTkinter. The main purpose is to abstract away some tkinter stuff and making it easy to keep a project organised. 
 
 Features
 * Page transitions
@@ -19,9 +19,12 @@ How to use:
 ---
 
 ### Create app
-Here's a simple example of how to initialise a tkreact app
+Here's a simple example of how to initialise a tkreact app.
+
 We have configured some settings like the name and theme.
-And we have set the homepage to "main_menu" which is a tkreact "page"
+
+We have also set the "homepage" to a page called main_menu.
+This will be the first page that is rendered when our app runs.
 
 ```python
 import customtkinter as ctk
@@ -40,10 +43,13 @@ create_app(
 ---
 
 ### Pages
-Pages in tkreact are just functions that look like this:
+Pages in tkreact are just functions that contain all the logic & UI elements of that page.
+
+Pages usually follow this structure:
 * 1 - Logic first
 * 2 - UI after
-Note: pages must always have root & frame as a parameter
+
+Note: pages must always have root & frame as a parameter.
 ```python
 import customtkinter as ctk
 
