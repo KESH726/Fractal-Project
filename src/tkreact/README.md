@@ -41,8 +41,8 @@ create_app(
 
 ### Pages
 Pages in tkreact are just functions that look like this:
-1 - Logic first
-2 - UI after
+* 1 - Logic first
+* 2 - UI after
 Note: pages must always have root & frame as a parameter
 ```python
 import customtkinter as ctk
@@ -54,6 +54,11 @@ def main_menu(root, frame):
     btn2 = ctk.CTkButton(master=frame, text="Quit", command=quit_button)
     btn2.place(relx=0.5, rely=0.7, anchor="s")
 ``` 
+
+To navigate to a different page, simply use the function `render_page()`
+```python
+render_page(my_page)
+```
 
 ---
 
