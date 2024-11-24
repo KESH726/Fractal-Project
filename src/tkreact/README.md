@@ -16,7 +16,9 @@ How to use:
 * Context.get_var() - takes 1 argument: key
 * Context.remove_var() - takes 1 argument: key
 
-## Example
+---
+
+### Create app
 Here's a simple example of how to initialise a tkreact app
 We have configured some settings like the name and theme.
 And we have set the homepage to "main_menu" which is a tkreact "page"
@@ -35,6 +37,9 @@ create_app(
 )
 ```
 
+---
+
+### Pages
 Pages in tkreact are just functions that look like this:
 1 - Logic first
 2 - UI after
@@ -49,3 +54,52 @@ def main_menu(root, frame):
     btn2 = ctk.CTkButton(master=frame, text="Quit", command=quit_button)
     btn2.place(relx=0.5, rely=0.7, anchor="s")
 ``` 
+
+---
+
+### Components
+Components are reusable UI elements
+E.g. if you made a custom button, you can reuse it as much as you'd like
+
+And they are defined in the same way as pages, but 
+they have one extra feature: props
+
+Props are variables that you can pass to a component
+```python
+# Component definition for a button
+def MyButton(root, frame, label_text, width, height):
+    button = ctk.CTkButton(master=frame, text=label_text, width=width, height=height)
+    button.pack()
+
+# Component usage
+use_component(MyButton, label_text="Start Game", width=200, height=60)
+```
+
+---
+
+### Context – Managing Global State
+
+`Context` is a class used for managing global state that can be accessed anywhere in your app.
+
+You can set and get variables using the static methods `Context.set_var()` and `Context.get_var()`.
+
+```python
+# Setting a global variable
+Context.set_var("score", 0)
+
+# Getting a global variable
+score = Context.get_var("score")
+print(score)  # Output: 0
+```
+
+Here's Context being used with a component:
+```python
+# Component definition using Context
+def ScoreLabel(root, frame):
+    score = Context.get_var("score")  # Accessing global state
+    label = ctk.CTkLabel(master=frame, text=f"Score: {score}", font=("Arial", 16))
+    label.pack()
+
+# Usage of ScoreLabel component
+use_component(ScoreLabel)
+```
