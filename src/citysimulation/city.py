@@ -1,5 +1,19 @@
 import pygame
 from math import sqrt
+import random
+
+# TODO:
+# Create a list of *all* coordinates that are taken up by the road
+    # Basically, we have coordinates for start and end points
+    # Use interpolation to get the rest of that road's coordinates. Do this for every road
+# Why?
+# If we know the *entire* space of the city that is taken by roads, we can make sure:
+# 1. Buildings aren't placed on roads
+# 2. Cars can transfer roads, if another road is within range
+
+# (Further explanation about point 2)
+# Without this, cars can only transfer to a new road's start or end point
+# However, we want it to be able to connect to any point of a nearby road. E.g. if middle of new road is connected to old road
 
 coordinates = [
     # Horizontal Roads
@@ -60,7 +74,7 @@ class Car:
     def update(self):
         self.progress += self.speed / self.current_road.get_length()
         if self.progress >= 1:
-            self.progress = 1  # You'll handle road switching in your pathfinding
+            self.progress = 1  # handle road switching later in pathfinding
             
         # Interpolate position
         start_x, start_y = self.current_road.start_pos
@@ -69,11 +83,24 @@ class Car:
             start_x + (end_x - start_x) * self.progress,
             start_y + (end_y - start_y) * self.progress
         )
+    
+    def pathfinding(self):
+        pass
+
+
+class Building:
+    def __init__(self, x, y, width, height):
+        self.coord = pygame.Rect(x, y, width, height)
+        self.color = (72, 73, 74)
+    
+    def draw(self, screen):
+        pygame.draw.rect(screen, self.color, self.coord)
 
 
 class RoadNetwork:
     _car_list = []
     _road_list = []
+    _building_list = []
 
     def __init__(self, roads_coordinates):
         self.roads_coordinates = roads_coordinates
@@ -85,14 +112,26 @@ class RoadNetwork:
     def create_cars(self):
         for road in self._road_list:
             new_car = Car(road, 0.5)
-            self._car_list.append(new_car)
+            RoadNetwork._car_list.append(new_car)
+    
+    def create_buildings(self, building_count):
+        for i in range(building_count):
+            boundary_px = 60
+            random_x = random.randint(0+boundary_px,800-boundary_px)
+            random_y = random.randint(0+boundary_px,800-boundary_px)
+            random_width = random.randint(10,20)
+            random_height = random.randint(10,20)
+            new_building = Building(random_x, random_y, random_width, random_height)
+            RoadNetwork._building_list.append(new_building)
     
     def draw_and_update(self, screen):
-        for road in self._road_list:
+        for road in RoadNetwork._road_list:
             road.draw(screen)
-        for car in self._car_list:
+        for car in RoadNetwork._car_list:
             car.update()
             car.draw(screen)
+        for building in RoadNetwork._building_list:
+            building.draw(screen)
 
     
 def init_city(width, height, city_config):
@@ -105,6 +144,7 @@ def init_city(width, height, city_config):
     my_city = RoadNetwork(coordinates)
     my_city.create_roads()
     my_city.create_cars()
+    my_city.create_buildings(10)
 
     run = True
     while run:
@@ -122,4 +162,5 @@ def init_city(width, height, city_config):
         
     pygame.quit()
 
-init_city(800, 800, 1)
+if __name__ == "__main__":
+    init_city(800, 800, 1)
