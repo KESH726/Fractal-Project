@@ -22,9 +22,18 @@ class DendriteFractal:
         z = zx + 1j * zy
         fractal = np.zeros(z.shape, dtype=int)
 
-        for i in range(max_iteration):
-            mask = np.abs(z) < escape_radius
+        for i in range(self.max_iteration):
+            mask = np.abs(z) < self.escape_radius
             z[mask] = z[mask]**2 + c
             fractal[mask] = i
 
         return fractal
+
+
+
+if __name__ == "__main__":
+    dendrite = DendriteFractal(0.334, .645)
+    fract = dendrite.generate_julia_set()
+
+    for x in fract:
+        print(x)

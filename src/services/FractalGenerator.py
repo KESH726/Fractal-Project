@@ -1,3 +1,5 @@
+from src.services.DendriteFractal import DendriteFractal
+
 
 '''
 <h1>FractalGenerator</h1>
@@ -11,9 +13,6 @@ The data structure is binary tree
 @:param fractal_coord; it is the content of the generated fractal coord ; eatch fractal coord represents each node of
 the binary tree also each fractal coord represents whole fractal
 '''
-from src.services.DendriteFractal import DendriteFractal
-
-
 class FractalGenerator:
     def __init__(self,x = -1.188, i = 0.305,max_iteration = 500,recursion_limit = 5,fractal_coord = None):
         self.recursion_limit = recursion_limit
@@ -28,9 +27,14 @@ class FractalGenerator:
     def _add_new_fractal_coord(self, fractal_coord):
         self.fractal_coord = fractal_coord
 
-    def generate_fractal_tree(self):
-        for x in range(self.recursion_limit):
-            self._add_new_fractal_coord(self.fractal_generator.generate_julia_set())
+    def generate_fractal_tree(self,fractal_coord):
+        if self.left == None and self.right == None and self.fract_coord == None:
+            self.fractal_coord = self.generate_fractal_tree(self.fractal_generator.generate_julia_set())
+
+
+
+
+
 
 
     def get_fractal_coord_tree_as_json(self):
