@@ -1,12 +1,12 @@
 import numpy as np
 
 class DendriteFractal:
-    def __init__(self,x, i,max_iteration = 500, escape_radius = 2):
+    def __init__(self,x, i,max_iteration = 500, escape_radius = 2,height = 800,width = 800):
         self.x = x
         self.i = i
         self.x_min, self.x_max = -1.5, 1.5
         self.y_min, self.y_max = -1.5, 1.5
-        self.width, self.height = 800, 800
+        self.width, self.height = width,height
         self.max_iteration = max_iteration
         self.escape_radius = escape_radius
 
