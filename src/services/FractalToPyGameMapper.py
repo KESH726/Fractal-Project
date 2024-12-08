@@ -75,3 +75,7 @@ class FractalToPyGameMapper:
                 new_pixels[idx,idx2] = pixel_map[y]
 
         return new_pixels
+
+
+    def convert_pygame_mapper_matrix_to_clustered_matrix(self,new_pixels):
+        pass

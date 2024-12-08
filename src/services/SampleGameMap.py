@@ -31,7 +31,7 @@ class Soil(pygame.sprite.Sprite):
         super().__init__()
 
         self.image = pygame.image.load("../assets/soil_grass_pack/dirt1.png")
-        self.image = pygame.transform.scale(self.image,(25,25))
+        self.image = pygame.transform.scale(self.image,(2,2))
         self.rect = self.image.get_rect()
         # self.rect.topleft = (x,y)
 
@@ -41,7 +41,7 @@ class Grass(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.image = pygame.image.load("../assets/soil_grass_pack/grass1.png")
-        self.image = pygame.transform.scale(self.image,(20,20))
+        self.image = pygame.transform.scale(self.image,(2,2))
         self.rect = self.image.get_rect()
 
     # def draw(self,x,y,screen_):
@@ -50,9 +50,14 @@ class Grass(pygame.sprite.Sprite):
 class Water(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.Surface((25,25))
+
+        self.image = pygame.Surface((2,2))
         img = pygame.image.load("../assets/water_class.png").convert_alpha()
-        self.image.blit(img,(0,0),(3*25,3*25,25,25))
+        self.image.blit(img,(0,0),(407,510,140,140))
+        self.image.set_colorkey((31,26,23))
+
+        pygame.transform.scale(self.image,(2,2))
+
         self.rect = self.image.get_rect()
 
 fractal = DendriteFractal(-0.37,0.6,game_window_dimension[0],game_window_dimension[1])
@@ -71,27 +76,25 @@ def generate_pygame_landscape_from_map_matrix(map_matrix,screen_):
                 # print("Brightness found ")
                 # high brightness
                 grass = Grass()
-                grass.rect.x = x+25
+                grass.rect.x = x
                 # print(f"printing coord : {x*100}, {y*100}")
-                grass.rect.y = y+25
+                grass.rect.y = y
                 # print(f"grass.rect : {grass.rect.x}, {grass.rect.y}")
                 map_group.add(grass)
 
-            elif map_matrix[y,x] == "*":
-                # mid brightness
-                # water = Water()
-                # water.x = x
-                # water.y = y
-                # water_group = pygame.sprite.Group()
-                # water_group.add(water)
-                # water_group.draw(screen_)
-                pass
             elif map_matrix[y,x] == " ":
+                # mid brightness
+
+                water = Water()
+                water.rect.x = x
+                water.rect.y = y
+                map_group.add(water)
+            elif map_matrix[y,x] == "*":
                 # low brightness
                 # print("low Brightness found ")
                 soil = Soil()
-                soil.rect.x = x+25
-                soil.rect.y = y+25
+                soil.rect.x = x
+                soil.rect.y = y
                 soil_group = pygame.sprite.Group()
                 map_group.add(soil)
 
