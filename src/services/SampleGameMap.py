@@ -1,7 +1,4 @@
 import pygame,sys
-from random import randint
-from concurrent.futures import ThreadPoolExecutor
-from threading import Lock
 
 
 from DendriteFractal import DendriteFractal
@@ -108,7 +105,8 @@ clock = pygame.time.Clock()
 map_grp =generate_pygame_landscape_from_map_matrix(fractal_pygame_map_matrix,screen)
 while True:
     for event in pygame.event.get():
-
+        if event.type == pygame.MOUSEWHEEL:
+            print(event.x, event.y)
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
