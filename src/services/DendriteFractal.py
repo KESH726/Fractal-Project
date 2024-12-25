@@ -13,7 +13,7 @@ class DendriteFractal:
     def set_max_iteration(self, max_iteration):
         self.max_iteration = max_iteration
 
-    def generate_julia_set(self):
+    def generate(self):
         x = np.linspace(self.x_min, self.x_max, self.width)
         y = np.linspace(self.y_min, self.y_max, self.height)
         zx, zy = np.meshgrid(x, y)
@@ -33,7 +33,7 @@ class DendriteFractal:
 
 if __name__ == "__main__":
     dendrite = DendriteFractal(0.334, .645)
-    fract = dendrite.generate_julia_set()
+    fract = dendrite.generate()
 
     for x in fract:
         print(x)
