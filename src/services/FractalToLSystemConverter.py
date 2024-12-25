@@ -1,3 +1,6 @@
+'''
+@deprecated
+'''
 class FractalToLSystemConverter:
     def __init__(self):
         pass
@@ -45,3 +48,14 @@ class FractalToLSystemConverter:
         #     print(x)
 
         self._text_arr = text_arr
+
+
+    def get_l_system(self,height, width):
+        mid_point = {"height": height // 2, "width": width // 2}
+        # low brightness
+            # --> for now i am now working only low brightness stuff
+        # high brightness
+        # mid brightness
+
+
+        return None
