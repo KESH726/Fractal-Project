@@ -18,12 +18,19 @@ The data structure is binary tree
 the binary tree also each fractal coord represents whole fractal
 '''
 class FractalGenerator:
-    def __init__(self,x = -1.188, i = 0.305,max_iteration = 500,recursion_limit = 5, fractal_type = FractalType.DENDRITE):
+    def __init__(self,x = -1.188, i = 0.305,max_iteration = 500,
+                 recursion_limit = 5,
+                 fractal_type = FractalType.DENDRITE,
+                 height = 800,
+                 width = 800):
+
         self.recursion_limit = recursion_limit
         self.x = x
         self.i = i
         self.max_iteration = max_iteration
         self.fractal_type = fractal_type
+        self.height = height
+        self.width = width
 
     def mapcolor(self,iterations, max_iteration):
         """Map the number of iterations to RGB values for coloring."""
@@ -89,6 +96,19 @@ class FractalGenerator:
                               ".": high_brightness_pixel_coord_list}
         return pixel_coord_mapper
 
+
+    def generate_fractal(self):
+        self.fractal_generator_obj = None
+        match(self.fractal_type):
+            case FractalType.DENDRITE:
+                self.fractal_generator_obj = DendriteFractal(x = self.x,i = self.i,
+                                                        max_iteration = self.max_iteration,
+                                                        height = self.height , width = self.width)
+
+        self.fractal_pixels = self.fractal_generator_obj.generate()
+
+        return self
+
     '''
     Gives pixel coord mapper like this structure:
     {
@@ -97,22 +117,15 @@ class FractalGenerator:
     ".": [(32,64)]
     }
     '''
-    def generate_pixel_coord_mapper(self,height = 800, width = 800):
-        fractal_generator_obj = None
-        match(self.fractal_type):
-            case FractalType.DENDRITE:
-                fractal_generator_obj = DendriteFractal(x = self.x,i = self.i, max_iteration = self.max_iteration,height = height , width = width)
-
-        fractal_pixels = fractal_generator_obj.generate()
-
-        colors = self.mapcolor(fractal_pixels, self.max_iteration)
+    def generate_pixel_coord_mapper(self):
+        colors = self.mapcolor(self.fractal_pixels, self.max_iteration)
         img = Image.fromarray(colors, mode="RGB")
         img = ImageOps.grayscale(img)
 
-        print(f"Printing teh the mapper : {self.convert_pixel_matrix_to_symbol_matrix(img)}")
+        # print(f"Printing teh the mapper : {self.convert_pixel_matrix_to_symbol_matrix(img)}")
         return self.convert_pixel_matrix_to_symbol_matrix(img)
 
 
 if __name__ == "__main__":
-    fractal_generator = FractalGenerator(x = -0.37, i = 0.6)
-    fractal_generator.generate(height = 60, width = 60)
+    fractal_generator = FractalGenerator(x = -0.37, i = 0.6,height = 60, width = 60)
+    print(fractal_generator.generate_fractal().generate_pixel_coord_mapper())
