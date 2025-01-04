@@ -2,20 +2,7 @@ import pygame
 from math import sqrt
 import random
 
-# TODO:
-# Create a list of *all* coordinates that are taken up by the road
-    # Basically, we have coordinates for start and end points
-    # Use interpolation to get the rest of that road's coordinates. Do this for every road
-# Why?
-# If we know the *entire* space of the city that is taken by roads, we can make sure:
-# 1. Buildings aren't placed on roads
-# 2. Cars can transfer roads, if another road is within range
-
-# (Further explanation about point 2)
-# Without this, cars can only transfer to a new road's start or end point
-# However, we want it to be able to connect to any point of a nearby road. E.g. if middle of new road is connected to old road
-
-coordinates = [
+road_coordinates = [
     # Horizontal Roads
     ((50, 100), (250, 100)),
     ((300, 200), (600, 200)),
@@ -41,6 +28,51 @@ coordinates = [
     ((400, 500), (550, 650)),
     ((200, 250), (350, 400)),
     ((650, 150), (800, 300))
+]
+
+coordinates = [
+    (50, 100),
+    (250, 100),
+    (300, 200),
+    (600, 200),
+    (100, 300),
+    (400, 300),
+    (450, 400),
+    (750, 400),
+    (200, 500),
+    (500, 500),
+
+    (100, 50),
+    (100, 250),
+    (250, 150),
+    (250, 450),
+    (400, 100),
+    (400, 350),
+    (550, 200),
+    (550, 500),
+    (700, 50),
+    (700, 250),
+
+    (50, 50),
+    (200, 200),
+    (250, 100),
+    (400, 250),
+    (150, 400),
+    (300, 550),
+    (500, 50),
+    (650, 200),
+    (350, 300),
+    (500, 450),
+    (600, 400),
+    (750, 550),
+    (100, 600),
+    (250, 750),
+    (400, 500),
+    (550, 650),
+    (200, 250),
+    (350, 400),
+    (650, 150),
+    (800, 300)
 ]
 
 class Road:
@@ -102,8 +134,10 @@ class RoadNetwork:
     _road_list = []
     _building_list = []
 
-    def __init__(self, roads_coordinates):
-        self.roads_coordinates = roads_coordinates
+    def __init__(self, coordinates):
+        coordinate_pairs = []
+
+        self.roads_coordinates = road_coordinates
     
     def create_roads(self):
         for road_coordinate in self.roads_coordinates:
@@ -136,8 +170,26 @@ class RoadNetwork:
     
 def init_city(width, height, city_config):
     pygame.init()
-    screen = pygame.display.set_mode((width, height))
+    screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
     clock = pygame.time.Clock()
+
+    # Camera variables
+    camera_x, camera_y = 0, 0  # Camera offset
+    camera_zoom = 1.0           # Zoom factor (1.0 means no zoom)
+
+    # Create a test surface that is larger than the screen (e.g., a large map)
+    scale_factor = 3
+    map_width, map_height = 1000*scale_factor, 720*scale_factor
+    map_surface = pygame.Surface((map_width, map_height))
+
+    map_surface.fill((40, 255, 100))
+
+     # Start the camera at the center of the map
+    camera_x = (map_width - width) // 2  # Center the camera horizontally
+    camera_y = (map_height - height) // 2  # Center the camera vertically
+
+    dragging = False
+    last_mouse_x, last_mouse_y = 0, 0
     
     pygame.display.set_caption('Fractal City Simulation')
 
@@ -148,18 +200,48 @@ def init_city(width, height, city_config):
 
     run = True
     while run:
-        screen.fill((40, 255, 100))
+        screen.fill((0, 0, 0))
+        map_surface.fill((40, 255, 100))
 
-        my_city.draw_and_update(screen)
-
-        pygame.display.update()
-        clock.tick(60)
+        my_city.draw_and_update(map_surface)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 return
+            elif event.type == pygame.VIDEORESIZE:  # Handle resize events
+                screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:  # Left-click to start dragging
+                    dragging = True
+                    last_mouse_x, last_mouse_y = event.pos
+            elif event.type == pygame.MOUSEBUTTONUP:
+                if event.button == 1:  # Stop dragging
+                    dragging = False
+            elif event.type == pygame.MOUSEMOTION:
+                if dragging:
+                    mouse_x, mouse_y = event.pos
+                    # Move the camera by the difference in mouse movement
+                    camera_x -= mouse_x - last_mouse_x
+                    camera_y -= mouse_y - last_mouse_y
+                    last_mouse_x, last_mouse_y = mouse_x, mouse_y
+            elif event.type == pygame.MOUSEWHEEL:
+                zoom_factor = 1.1 if event.y > 0 else 1 / 1.1
+                camera_zoom *= zoom_factor
+
+        # Apply the camera transformations (panning + zooming)
+        scaled_surface = pygame.transform.scale(map_surface, 
+                                                (int(map_width * camera_zoom), int(map_height * camera_zoom)))
+
+        # Compute the area of the map that should be visible based on camera position and zoom
+        camera_rect = pygame.Rect(camera_x, camera_y, width, height)
         
+        # Blit the visible portion of the map to the screen
+        screen.blit(scaled_surface, (0, 0), camera_rect)
+
+        pygame.display.update()
+        clock.tick(60)
+
     pygame.quit()
 
 if __name__ == "__main__":
