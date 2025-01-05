@@ -1,6 +1,10 @@
 import customtkinter as ctk
-from src.tkreact import render_page
+from src.tkreact import render_page, use_component
 
+# Components
+from src.components import dark_mode_switch
+
+# Pages
 from .fractal_editor import fractal_editor
 
 def main_menu(root, frame):
@@ -21,3 +25,6 @@ def main_menu(root, frame):
     btn2 = ctk.CTkButton(master=frame, text="Quit", command=quit_button)
     btn2.place(relx=0.5, rely=0.7, anchor="s")
 
+    # Dark mode switch component
+    use_component(dark_mode_switch)
+    

@@ -21,7 +21,7 @@ class RootManager:
         return RootManager._root
 
     @staticmethod
-    def get_frame(frame):
+    def get_frame():
         if RootManager._current_frame is None:
             raise ValueError("Current frame has not been set!")
         return RootManager._current_frame
