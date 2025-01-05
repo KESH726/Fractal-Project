@@ -258,6 +258,9 @@ def init_city(width, height, city_config):
 
     dragging = False
     last_mouse_x, last_mouse_y = 0, 0
+
+    # Set default cursor to system cursor
+    pygame.mouse.set_cursor(*pygame.cursors.arrow)
     
     pygame.display.set_caption('Fractal City Simulation')
 
@@ -283,9 +286,13 @@ def init_city(width, height, city_config):
                 if event.button == 1:  # Left-click to start dragging
                     dragging = True
                     last_mouse_x, last_mouse_y = event.pos
+                    # Change cursor to grab hand when dragging
+                    pygame.mouse.set_cursor(*pygame.cursors.broken_x)
             elif event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:  # Stop dragging
                     dragging = False
+                    # Reset cursor back to normal when done
+                    pygame.mouse.set_cursor(*pygame.cursors.arrow)
             elif event.type == pygame.MOUSEMOTION:
                 if dragging:
                     mouse_x, mouse_y = event.pos
