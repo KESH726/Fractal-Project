@@ -6,7 +6,10 @@ import tkinter as tk
 
 
 def leaderboards(root,frame):
-    value = [["#1","City 1",3,],
+    value = [
+        ["Rank","City Name","Score"],
+             [
+        "#1","City 1",3,],
              ["#2","City 2",6,],
              ["#3","City 3",10,],
              ["#4","City 4",12,],

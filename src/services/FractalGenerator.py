@@ -32,8 +32,14 @@ class FractalGenerator:
         self.height = height
         self.width = width
 
+    def set_x(self,x):
+        self.x = x
+        return self
+    def set_i(self,i):
+        self.i = i
+        return self
+
     def mapcolor(self,iterations, max_iteration):
-        """Map the number of iterations to RGB values for coloring."""
         colormap = (255 - iterations * 255 // max_iteration).astype(np.uint8)
         return np.stack([colormap, colormap // 2, colormap // 4], axis=-1)
 
