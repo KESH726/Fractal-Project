@@ -22,6 +22,11 @@ def fractal_editor(root, frame):
     x_label = ctk.CTkLabel(master=slider_grp, text=f"X = {fractal_generator.x}", font = ("Aerial", 10))
     i_label = ctk.CTkLabel(master=slider_grp, text=f"I = {fractal_generator.i}", font = ("Aerial", 10))
     
+    input_grp = ctk.CTkFrame(master=frame, bg_color="white", height=130, width=200)
+    seg_len = ctk.CTkEntry(master=input_grp, placeholder_text="Segment Length")
+    num_cars = ctk.CTkEntry(master=input_grp, placeholder_text="Number of cars")
+    num_stoplights = ctk.CTkEntry(master=input_grp, placeholder_text="Number of stoplights")
+    
    
     def update_canvas():
         fractals = fractal_generator.generate_fractal().fractal_pixels
@@ -58,6 +63,7 @@ def fractal_editor(root, frame):
     
     
     slider_grp.place(relx=0.70, rely=0.81, anchor="sw")
+    input_grp.place(relx=0.10, rely=0.81, anchor="sw")
     
     x_label.place(relx=0.40, rely=0.2, anchor = "sw")
     
@@ -69,6 +75,10 @@ def fractal_editor(root, frame):
     
     slider = ctk.CTkSlider(master=slider_grp, from_=-2, to=2, command=slider_event_i,variable=ctk.Variable(value=fractal_generator.i))
     slider.place(relx=0.50, rely=0.8, anchor="center")
+    
+    seg_len.place(relx=0.5, rely=0.1, anchor="n")
+    num_cars.place(relx=0.5, rely=0.4, anchor="n")
+    num_stoplights.place(relx=0.5, rely=0.7, anchor="n")
 
     btn2 = ctk.CTkButton(master=frame, text="Start city simulation", command=start_city)
     btn2.place(relx=0.5, rely=0.9, anchor="s")
