@@ -98,12 +98,13 @@ class Road:
 
 
 class Car:
-    def __init__(self, current_road, speed=2):
+    def __init__(self, network, current_road, speed=2):
         self.current_road = current_road
         self.speed = speed
         self.pos = current_road.start_pos
         self.progress = 0  # 0 to 1, representing position along current road
         self.color = (255, 0, 0)  # Red car
+        self.network = network
     
     def draw(self, screen):
         pygame.draw.ellipse(screen, self.color, (self.pos[0]-10, self.pos[1]-5, 20, 10))
@@ -112,6 +113,7 @@ class Car:
         self.progress += self.speed / self.current_road.get_length()
         if self.progress >= 1:
             self.progress = 1  # handle road switching later in pathfinding
+            self.switch_road()
             
         # Interpolate position
         start_x, start_y = self.current_road.start_pos
@@ -121,9 +123,26 @@ class Car:
             start_y + (end_y - start_y) * self.progress
         )
     
-    def pathfinding(self):
-        pass
+    def switch_road(self):
+        roads = self.network.get_road_list(self.network)
+        match_roads = []
+        match_road_found = False
 
+        for road in roads:
+            if (road.start_pos == self.current_road.end_pos):
+                match_roads.append(road)
+                match_road_found = True
+        
+        if match_road_found:
+            random_match_road = random.choice(match_roads)
+            self.current_road = random_match_road
+            self.pos = random_match_road.start_pos
+            self.progress = 0
+        
+        if not match_road_found:
+            pass
+
+        # Find new ends
 
 class Building:
     def __init__(self, x, y, width, height):
@@ -207,14 +226,16 @@ class RoadNetwork:
         for road_coordinate in self.roads_coordinates:
             #print(road_coordinate)
             new_road = Road((road_coordinate[0]),(road_coordinate[1]))
+            new_reverse_road = Road((road_coordinate[1]),(road_coordinate[0]))
             
             # Only add roads to the network with a valid length (not 0)
             if new_road.get_length() != 0:
                 RoadNetwork._road_list.append(new_road)
+                RoadNetwork._road_list.append(new_reverse_road)
 
     def create_cars(self):
         for road in self._road_list:
-            new_car = Car(road, 0.5)
+            new_car = Car(RoadNetwork, road, 0.5)
             RoadNetwork._car_list.append(new_car)
     
     def create_buildings(self, building_count):
@@ -235,6 +256,15 @@ class RoadNetwork:
             car.draw(screen)
         for building in RoadNetwork._building_list:
             building.draw(screen)
+    
+    def get_car_list(self):
+        return self._car_list
+    
+    def get_road_list(self):
+        return self._road_list
+    
+    def get_building_list(self):
+        return self._building_list
 
     
 def init_city(width, height, city_config):
