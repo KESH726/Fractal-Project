@@ -1,7 +1,99 @@
 import pygame
+import math
 from math import sqrt
 import random
 import time
+import os
+import pygame
+
+
+def load_image(filename, scaled=False, width=100, height=100):
+    # Get the absolute path to the assets folder
+    assets_path = os.path.join(os.path.dirname(__file__), '../assets')
+
+    # Construct the full path to the image
+    image_path = os.path.join(assets_path, filename)
+
+    # Normalize the path to use forward slashes
+    image_path = image_path.replace("\\", "/")
+
+    # Debugging: Print the path being used
+    print(f"Attempting to load image from: {image_path}")
+    
+    image = pygame.image.load(image_path)
+    
+    if scaled:
+        scaled_image = pygame.transform.scale(image, (width, height))
+        return scaled_image
+
+    return image
+
+def load_image_with_rounded_corners(filename, width, height, radius):
+    # Initialize Pygame if not already initialized
+    if not pygame.get_init():
+        pygame.init()
+
+    # Create a dummy display surface (this prevents "No video mode has been set" error)
+    pygame.display.set_mode((1, 1))
+
+    # Get the absolute path to the assets folder
+    assets_path = os.path.join(os.path.dirname(__file__), '../assets')
+
+    # Construct the full path to the image
+    image_path = os.path.join(assets_path, filename)
+
+    # Normalize the path to use forward slashes
+    image_path = image_path.replace("\\", "/")
+
+    # Debugging: Print the path being used
+    print(f"Attempting to load image from: {image_path}")
+    
+    # Load the image and convert it to have an alpha channel
+    image = pygame.image.load(image_path).convert_alpha()
+
+    # Scale the image to the desired size
+    image = pygame.transform.scale(image, (width, height))
+
+    # Create a mask with a rounded rectangle
+    mask = pygame.Surface((width, height), pygame.SRCALPHA)  # Create a surface with alpha channel
+    mask.fill((0, 0, 0, 0))  # Fill with transparency (fully alpha)
+    
+    # Draw a filled rounded rectangle onto the mask (white part will be visible)
+    pygame.draw.rect(mask, (255, 255, 255), (0, 0, width, height), border_radius=radius)
+    
+    # Apply the mask to the image using BLEND_RGBA_MULT to preserve transparency
+    image.blit(mask, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+
+    return image
+
+
+# Art assets
+grass_image = load_image("city/ground_grass.png")
+road_image = load_image_with_rounded_corners("city/road.png", 60, 60, 10)
+car_images = [
+    load_image("city/cars/van_black.png"),
+    load_image("city/cars/pickup_olive.png"),
+    load_image("city/cars/sedan_red.png"),
+    load_image("city/cars/police_patrol_color.png"),
+    load_image("city/cars/ambulance.png"),
+    load_image("city/cars/seda_blue.png"),
+    load_image("city/cars/van_red.png"),
+    load_image("city/cars/pickup_gray.png"),
+]
+nature_images = [
+    load_image("city/bush_01.png"),
+    load_image("city/bush_02.png"),
+    load_image("city/bush_03.png"),
+    load_image("city/bush_04.png"),
+    load_image("city/flowers_red.png"),
+    load_image("city/flowers_yellow.png"),
+    load_image("city/light_post.png"),
+    load_image("city/tree_01.png"),
+    load_image("city/tree_02.png"),
+    load_image("city/tree_fall_01.png"),
+    load_image("city/tree_fall_03.png"),
+]
+
 
 # Helper functions
 def calculate_magnitude(point1, point2):
@@ -86,16 +178,50 @@ class Road:
         self.start_pos = start_pos
         self.end_pos = end_pos
         self.width = width
-        self.color = (128,128,128)
-    
-    def draw(self, screen):
-        pygame.draw.line(screen, self.color, self.start_pos, self.end_pos, self.width)
-    
-    def get_length(self):
+        self.road_image = road_image.convert_alpha()  # Ensure the image has alpha transparency
+
+        # Calculate the road length (distance between start and end)
+        self.length = self.get_length()
+
+        # Calculate the angle to rotate the road image (from start to end)
+        self.angle = self.calculate_angle()
+
+    def calculate_angle(self):
+        # Calculate the angle (in degrees) between the start and end points
         x1, y1 = self.start_pos
         x2, y2 = self.end_pos
+        return math.degrees(math.atan2(y2 - y1, x2 - x1))
 
-        return sqrt((x2-x1)**2 + (y2-y1)**2)
+    def draw(self, screen):
+        # Get the dimensions of the road image (keeping its original size)
+        image_width, image_height = self.road_image.get_size()
+
+        # Calculate the number of tiles needed to cover the road
+        num_tiles = int(self.length / image_width)
+
+        for i in range(num_tiles):
+            # Position each image along the road
+            # Calculate the x, y position for the tile
+            tile_pos = (
+                self.start_pos[0] + i * image_width * math.cos(math.radians(self.angle)),
+                self.start_pos[1] + i * image_width * math.sin(math.radians(self.angle))
+            )
+
+            # Rotate the image to match the road angle
+            rotated_image = pygame.transform.rotate(self.road_image, -self.angle)
+
+            # Get the rotated image's rect to position it correctly
+            rotated_rect = rotated_image.get_rect()
+            rotated_rect.center = tile_pos
+
+            # Draw the rotated image at the calculated position
+            screen.blit(rotated_image, rotated_rect.topleft)
+
+    def get_length(self):
+        # Calculate the length of the road (distance between start and end points)
+        x1, y1 = self.start_pos
+        x2, y2 = self.end_pos
+        return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
 
 class Car:
@@ -108,13 +234,33 @@ class Car:
         self.network = network
 
         self.nearby_cars = []
-
         self.range = 10
-
         self.stop_counter = 0
+
+        self.car_image = random.choice(car_images)
+        self.angle = 0
     
     def draw(self, screen):
-        pygame.draw.ellipse(screen, self.color, (self.pos[0]-10, self.pos[1]-5, 20, 10))
+        #pygame.draw.ellipse(screen, self.color, (self.pos[0]-10, self.pos[1]-5, 20, 10))
+         # Calculate the vector from the car's current position to the destination (end of the road)
+        start_x, start_y = self.pos
+        end_x, end_y = self.current_road.end_pos
+
+        # Calculate the angle using atan2 (returns angle in radians)
+        delta_x = end_x - start_x
+        delta_y = end_y - start_y
+        self.angle = math.degrees(math.atan2(delta_y, delta_x))  # Convert radians to degrees for rotation
+
+        self.angle += 180
+
+        # Rotate the car image based on the calculated angle
+        rotated_image = pygame.transform.rotate(self.car_image, -self.angle)  # Negative to rotate correctly
+
+        # Get the new position for the rotated image (so it's centered around the car's position)
+        new_rect = rotated_image.get_rect(center=(self.pos[0], self.pos[1]))
+
+        # Draw the rotated car image
+        screen.blit(rotated_image, new_rect.topleft)
 
     def update(self):
         self.check_for_traffic()
@@ -195,12 +341,12 @@ class Car:
         if not car_in_range:
             # Reset timer and resume movement if no cars are in range
             self.start_time = None
-            self.speed = 0.5
+            self.speed = 2
         else:
             # Check if it's time to resume
             elapsed_time = time.time() - self.start_time
             if elapsed_time >= 2:
-                self.speed = 0.5
+                self.speed = 2
                 self.start_time = None  # Reset timer after resuming
 
 
@@ -217,8 +363,11 @@ class RoadNetwork:
     _car_list = []
     _road_list = []
     _building_list = []
+    _nature_list = []
 
     def __init__(self, coordinates, segments, scale_factor, translation_vector):
+        self.initial_coords = coordinates
+
         # Pairs of coordinates to create vector lines for roads
         coordinate_pairs = []
 
@@ -295,7 +444,7 @@ class RoadNetwork:
 
     def create_cars(self):
         for road in self._road_list:
-            new_car = Car(RoadNetwork, road, 0.5)
+            new_car = Car(RoadNetwork, road, 2)
             RoadNetwork._car_list.append(new_car)
     
     def create_buildings(self, building_count):
@@ -308,6 +457,27 @@ class RoadNetwork:
             new_building = Building(random_x, random_y, random_width, random_height)
             RoadNetwork._building_list.append(new_building)
     
+    def create_nature(self, nature_count, map_width, map_height):
+        new_coordinates = []
+
+        while len(new_coordinates) < nature_count:
+            # Generate random coordinates within the map boundaries
+            x = random.randint(0, map_width - 1)
+            y = random.randint(0, map_height - 1)
+
+            # Check if this coordinate is not already in the existing list or the new coordinates list
+            if (x, y) not in self.initial_coords and (x, y) not in new_coordinates:
+                new_coordinates.append((x, y))
+
+        # For each generated coordinate, select a random nature image
+        for coord in new_coordinates:
+            # Select a random image from the nature_images list
+            nature_image = random.choice(nature_images)
+            
+            # Add a dictionary or object to store the image and its position (for later drawing)
+            nature_obj = {"image": nature_image, "position": coord}
+            RoadNetwork._nature_list.append(nature_obj)
+    
     def draw_and_update(self, screen):
         for road in RoadNetwork._road_list:
             road.draw(screen)
@@ -316,6 +486,9 @@ class RoadNetwork:
             car.draw(screen)
         for building in RoadNetwork._building_list:
             building.draw(screen)
+        for nature_obj in RoadNetwork._nature_list:
+            # Draw the nature image at its position
+            screen.blit(nature_obj["image"], nature_obj["position"])
     
     def get_car_list(self):
         return self._car_list
@@ -325,6 +498,18 @@ class RoadNetwork:
     
     def get_building_list(self):
         return self._building_list
+
+
+
+# Map
+def tile_grass(map_surface, map_width, map_height):
+    # Get the dimensions of the grass image
+    grass_width, grass_height = grass_image.get_size()
+    
+    # Tile the grass texture over the entire surface
+    for x in range(0, map_width, grass_width):
+        for y in range(0, map_height, grass_height):
+            map_surface.blit(grass_image, (x, y))
 
     
 def init_city(width, height, city_config):
@@ -337,7 +522,8 @@ def init_city(width, height, city_config):
     map_width, map_height = 1000*scale_factor, 720*scale_factor
     map_surface = pygame.Surface((map_width, map_height))
 
-    map_surface.fill((40, 255, 100))
+    #map_surface.fill((40, 255, 100))
+    tile_grass(map_surface, map_width, map_height)
 
     # Camera variables
     camera_zoom = 0.5           # Zoom factor (1.0 means no zoom)
@@ -345,7 +531,6 @@ def init_city(width, height, city_config):
     camera_offset_quotient = (camera_zoom*10) + 1
     camera_x, camera_y = map_width/(camera_offset_quotient), map_width/(camera_offset_quotient) 
     
-
     dragging = False
     last_mouse_x, last_mouse_y = 0, 0
 
@@ -358,11 +543,13 @@ def init_city(width, height, city_config):
     my_city.create_roads()
     my_city.create_cars()
     my_city.create_buildings(10)
+    my_city.create_nature(500, map_width, map_height)
 
     run = True
     while run:
         screen.fill((0, 0, 0))
-        map_surface.fill((40, 255, 100))
+        #map_surface.fill((40, 255, 100))
+        tile_grass(map_surface, map_width, map_height)
 
         my_city.draw_and_update(map_surface)
 
