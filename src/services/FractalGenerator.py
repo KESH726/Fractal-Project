@@ -14,7 +14,7 @@ The data structure is binary tree
 @:param i : value of the imaginary number
 @:param max_iteration iteration count for the fractal generation
 @:param recursion_limit the limit of the fractal tree
-@:param fractal_coord; it is the content of the generated fractal coord ; eatch fractal coord represents each node of
+@:param fractal_coord; it is the content of the generated fractal coord ; each fractal coord represents each node of
 the binary tree also each fractal coord represents whole fractal
 '''
 class FractalGenerator:
