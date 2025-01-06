@@ -61,13 +61,13 @@ def fractal_editor(root, frame):
     
     x_label.place(relx=0.40, rely=0.2, anchor = "sw")
     
-    slider = ctk.CTkSlider(master=slider_grp, from_=-2, to=2, command=slider_event_x)
+    slider = ctk.CTkSlider(master=slider_grp, from_=-2, to=2, command=slider_event_x,variable=ctk.Variable(value=fractal_generator.x))
     slider.place(relx=0.50, rely=0.3, anchor="center")
     
     
     i_label.place(relx=0.40, rely=0.7, anchor = "sw")
     
-    slider = ctk.CTkSlider(master=slider_grp, from_=-2, to=2, command=slider_event_i)
+    slider = ctk.CTkSlider(master=slider_grp, from_=-2, to=2, command=slider_event_i,variable=ctk.Variable(value=fractal_generator.i))
     slider.place(relx=0.50, rely=0.8, anchor="center")
 
     btn2 = ctk.CTkButton(master=frame, text="Start city simulation", command=start_city)
