@@ -14,7 +14,7 @@ The data structure is binary tree
 @:param i : value of the imaginary number
 @:param max_iteration iteration count for the fractal generation
 @:param recursion_limit the limit of the fractal tree
-@:param fractal_coord; it is the content of the generated fractal coord ; eatch fractal coord represents each node of
+@:param fractal_coord; it is the content of the generated fractal coord ; each fractal coord represents each node of
 the binary tree also each fractal coord represents whole fractal
 '''
 class FractalGenerator:
@@ -32,8 +32,14 @@ class FractalGenerator:
         self.height = height
         self.width = width
 
+    def set_x(self,x):
+        self.x = x
+        return self
+    def set_i(self,i):
+        self.i = i
+        return self
+
     def mapcolor(self,iterations, max_iteration):
-        """Map the number of iterations to RGB values for coloring."""
         colormap = (255 - iterations * 255 // max_iteration).astype(np.uint8)
         return np.stack([colormap, colormap // 2, colormap // 4], axis=-1)
 
