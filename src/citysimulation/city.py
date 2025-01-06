@@ -1,6 +1,7 @@
 import pygame
 from math import sqrt
 import random
+import time
 
 # Helper functions
 def calculate_magnitude(point1, point2):
@@ -105,11 +106,19 @@ class Car:
         self.progress = 0  # 0 to 1, representing position along current road
         self.color = (255, 0, 0)  # Red car
         self.network = network
+
+        self.nearby_cars = []
+
+        self.range = 10
+
+        self.stop_counter = 0
     
     def draw(self, screen):
         pygame.draw.ellipse(screen, self.color, (self.pos[0]-10, self.pos[1]-5, 20, 10))
 
     def update(self):
+        self.check_for_traffic()
+
         self.progress += self.speed / self.current_road.get_length()
         if self.progress >= 1:
             self.progress = 1  # handle road switching later in pathfinding
@@ -138,11 +147,62 @@ class Car:
             self.current_road = random_match_road
             self.pos = random_match_road.start_pos
             self.progress = 0
+            self.check_nearby_cars()
         
         if not match_road_found:
             pass
+    
+    def check_nearby_cars(self):
+        cars = self.network.get_car_list(self.network)
+        roads = self.network.get_road_list(self.network)
 
-        # Find new ends
+        self.nearby_cars = []
+
+        # Collect cars from current road
+        for car in cars:
+            if self.current_road == car.current_road:
+               self. nearby_cars.append(car)
+
+        # Collect cars from nearby roads
+        for road in roads:
+            if (road.start_pos) == self.current_road.end_pos:
+                for car in cars:
+                    if car.current_road == road:
+                        self.nearby_cars.append(car)
+
+    def check_for_traffic(self):
+        # Track if a car is nearby and maintain a persistent timer
+        if not hasattr(self, 'start_time'):  # Initialize start_time if it doesn't exist
+            self.start_time = None
+
+        car_in_range = False
+
+        for car in self.nearby_cars:
+            # Check if car is within range
+            if calculate_magnitude(self.pos, car.pos) <= self.range:
+                difference = (car.progress - self.progress)
+                if 0 < difference <= 0.5:  # A car is close enough
+                    #print("CAR IN RANGE")
+                    self.stop_counter += 1
+                    self.speed = 0
+                    car_in_range = True
+
+                    # Start the timer if it hasn't been started
+                    if self.start_time is None:
+                        self.start_time = time.time()
+                    break  # Stop checking once a car is detected
+
+        if not car_in_range:
+            # Reset timer and resume movement if no cars are in range
+            self.start_time = None
+            self.speed = 0.5
+        else:
+            # Check if it's time to resume
+            elapsed_time = time.time() - self.start_time
+            if elapsed_time >= 2:
+                self.speed = 0.5
+                self.start_time = None  # Reset timer after resuming
+
 
 class Building:
     def __init__(self, x, y, width, height):
