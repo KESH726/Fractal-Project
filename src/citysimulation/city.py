@@ -364,8 +364,11 @@ class RoadNetwork:
     _road_list = []
     _building_list = []
     _nature_list = []
+    _cars_left = 0
 
-    def __init__(self, coordinates, segments, scale_factor, translation_vector):
+    def __init__(self, coordinates, segments, no_of_cars, scale_factor, translation_vector):
+        self._cars_left = no_of_cars
+
         self.initial_coords = coordinates
 
         # Pairs of coordinates to create vector lines for roads
@@ -444,8 +447,14 @@ class RoadNetwork:
 
     def create_cars(self):
         for road in self._road_list:
+            if self._cars_left <= 0:
+                break
+
             new_car = Car(RoadNetwork, road, 2)
             RoadNetwork._car_list.append(new_car)
+            self._cars_left -= 1
+            print("ADDED ONE CAR")
+
     
     def create_buildings(self, building_count):
         for i in range(building_count):
@@ -512,7 +521,7 @@ def tile_grass(map_surface, map_width, map_height):
             map_surface.blit(grass_image, (x, y))
 
     
-def init_city(width, height, city_config):
+def init_city(width, height, segments, cars, stoplights):
     pygame.init()
     screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
     clock = pygame.time.Clock()
@@ -539,7 +548,7 @@ def init_city(width, height, city_config):
     
     pygame.display.set_caption('Fractal City Simulation')
 
-    my_city = RoadNetwork(coordinates, 5, 3, (map_width/4, map_height/4))
+    my_city = RoadNetwork(coordinates, segments, cars, 3, (map_width/4, map_height/4))
     my_city.create_roads()
     my_city.create_cars()
     my_city.create_buildings(10)
@@ -597,4 +606,4 @@ def init_city(width, height, city_config):
     pygame.quit()
 
 if __name__ == "__main__":
-    init_city(800, 800, 1)
+    init_city(800, 800, 5, 10, 3)
