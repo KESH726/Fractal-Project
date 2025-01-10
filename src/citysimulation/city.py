@@ -1,6 +1,6 @@
 import pygame
 
-from .assetloader import load_image, load_image_with_rounded_corners
+from .assetloader import load_image
 
 from .fractal_coords import coordinates
 from .road_network import RoadNetwork
