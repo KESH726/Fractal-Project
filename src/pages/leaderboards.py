@@ -25,7 +25,7 @@ def leaderboards(root,frame):
              
          ]
     
-    leaderboard_image = tk.PhotoImage(file="src/pages/leaderboard_png.png")
+    leaderboard_image = tk.PhotoImage(file="src/assets/leaderboard.png")
     label = ctk.CTkLabel(master = frame, image = leaderboard_image )
     label.pack(expand=True, fill="both", padx=4, pady=4)
 
