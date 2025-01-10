@@ -1,8 +1,50 @@
 import pygame
+import time
 
 from .assetloader import load_image
-
 from .road_network import RoadNetwork
+
+import setup_context
+from src.tkreact import create_app
+from src.pages import leaderboards
+
+
+def save_simulation_results(network: RoadNetwork):
+    dti = []  # List to store delay percentages
+
+    # Get the list of cars from the network
+    car_list = network.get_car_list()
+
+    # Iterate over each car in the network
+    for car in car_list:
+        # Get the current time (end time)
+        end_time = time.time()
+
+        # Calculate the total time the car has been in existence (since creation)
+        total_time = end_time - car.creation_time
+
+        # Get the traffic delay time for the car
+        traffic_time = car.traffic_time
+
+        # Calculate the delay percentage (total delay time / total time * 100)
+        if total_time > 0:  # Avoid division by zero
+            delay_percentage = (traffic_time / total_time) * 100
+        else:
+            delay_percentage = 0  # If no time has passed, delay is 0%
+
+        # Append the calculated delay percentage to the list
+        dti.append(delay_percentage)
+
+        # Optionally, you can print or log the result for debugging purposes
+        print(f"Car ID: {car.id} - Total Time: {total_time:.2f} seconds - Delay Time: {traffic_time:.2f} seconds - Delay Percentage: {delay_percentage:.2f}%")
+
+    # Calculate and return the average of the delay percentages
+    if dti:  # Make sure the list is not empty
+        average_dti = sum(dti) / len(dti)
+    else:
+        average_dti = 0  # If there are no cars, return 0
+    
+    return average_dti
 
 # Grass tile map
 grass_image = load_image("city/ground_grass.png")
@@ -15,7 +57,6 @@ def tile_grass(map_surface, map_width, map_height):
     for x in range(0, map_width, grass_width):
         for y in range(0, map_height, grass_height):
             map_surface.blit(grass_image, (x, y))
-
     
 def init_city(width, height, segments, cars, stoplights, coordinates):
     pygame.init()
@@ -60,6 +101,22 @@ def init_city(width, height, segments, cars, stoplights, coordinates):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
+
+                save_simulation_results(my_city)
+
+                # When the user quits the simulation
+                # open the app again, and open the leaderboards page
+                # Initialise app context
+                setup_context()
+
+                # Initialise tkinter & run app
+                create_app(
+                    title="Recursive graphics project",
+                    window_size="960x600",
+                    appearance="dark",
+                    theme="dark-blue",
+                    homepage=leaderboards
+                )
                 return
             elif event.type == pygame.VIDEORESIZE:  # Handle resize events
                 screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)

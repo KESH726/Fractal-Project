@@ -116,11 +116,17 @@ class Car:
         self.network = network
 
         self.nearby_cars = []
-        self.range = 10
+        self.range = 70
         self.stop_counter = 0
 
         self.car_image = random.choice(car_images)
         self.angle = 0
+
+        self.creation_time = time.time()
+        self.traffic_time = 0
+        self.stop_start_time = None
+
+        self.cooldown_start_time = 3
     
     def draw(self, screen):
         #pygame.draw.ellipse(screen, self.color, (self.pos[0]-10, self.pos[1]-5, 20, 10))
@@ -145,7 +151,8 @@ class Car:
         screen.blit(rotated_image, new_rect.topleft)
 
     def update(self):
-        #self.check_for_traffic()
+        self.check_nearby_cars()
+        self.check_for_traffic()
 
         self.progress += self.speed / self.current_road.get_length()
         if self.progress >= 1:
@@ -187,58 +194,43 @@ class Car:
             self.swap_lane(random_match_road.reverse)
 
             self.progress = 0
-            #self.check_nearby_cars()
         
         if not match_road_found:
             pass
     
     def check_nearby_cars(self):
         cars = self.network.get_car_list(self.network)
-        roads = self.network.get_road_list(self.network)
+        # roads = self.network.get_road_list(self.network)
 
         self.nearby_cars = []
 
         # Collect cars from current road
         for car in cars:
-            if self.current_road == car.current_road:
-               self. nearby_cars.append(car)
-
-        # Collect cars from nearby roads
-        for road in roads:
-            if (road.start_pos) == self.current_road.end_pos:
-                for car in cars:
-                    if car.current_road == road:
-                        self.nearby_cars.append(car)
+            if (self.current_road == car.current_road) and car != self:
+               self.nearby_cars.append(car)
 
     def check_for_traffic(self):
-        # Track if a car is nearby and maintain a persistent timer
-        if not hasattr(self, 'start_time'):  # Initialize start_time if it doesn't exist
-            self.start_time = None
-
         car_in_range = False
 
         for car in self.nearby_cars:
+            if car == self:
+                continue
             # Check if car is within range
             if calculate_magnitude(self.pos, car.pos) <= self.range:
-                difference = (car.progress - self.progress)
-                if 0 < difference <= 0.5:  # A car is close enough
-                    #print("CAR IN RANGE")
+                difference = (self.progress - car.progress)
+                print("YO THERE'S A CAR ON MY ROAD AND THERES THIS DIFFERENCE ", difference)
+                if difference < 0:  # A car is close enough
+                    if self.speed != 0:  
+                        self.stop_start_time = time.time()
+                    print("CAR IN RANGE")
                     self.stop_counter += 1
                     self.speed = 0
                     car_in_range = True
-
-                    # Start the timer if it hasn't been started
-                    if self.start_time is None:
-                        self.start_time = time.time()
-                    break  # Stop checking once a car is detected
+                    break
 
         if not car_in_range:
-            # Reset timer and resume movement if no cars are in range
-            self.start_time = None
+            if self.speed == 0 and self.stop_start_time is not None:
+                elapsed_time = time.time() - self.stop_start_time
+                self.traffic_time += elapsed_time  
+                self.stop_start_time = None 
             self.speed = 2
-        else:
-            # Check if it's time to resume
-            elapsed_time = time.time() - self.start_time
-            if elapsed_time >= 2:
-                self.speed = 2
-                self.start_time = None  # Reset timer after resuming
