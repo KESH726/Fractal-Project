@@ -2,7 +2,6 @@ import pygame
 
 from .assetloader import load_image
 
-from .fractal_coords import coordinates
 from .road_network import RoadNetwork
 
 # Grass tile map
@@ -18,7 +17,7 @@ def tile_grass(map_surface, map_width, map_height):
             map_surface.blit(grass_image, (x, y))
 
     
-def init_city(width, height, segments, cars, stoplights):
+def init_city(width, height, segments, cars, stoplights, coordinates):
     pygame.init()
     screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
     clock = pygame.time.Clock()
@@ -48,7 +47,6 @@ def init_city(width, height, segments, cars, stoplights):
     my_city = RoadNetwork(coordinates, segments, cars, 3, (map_width/4, map_height/4))
     my_city.create_roads()
     my_city.create_cars()
-    my_city.create_buildings(10)
     my_city.create_nature(500, map_width, map_height)
 
     run = True

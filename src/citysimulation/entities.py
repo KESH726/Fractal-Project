@@ -35,10 +35,22 @@ def calculate_magnitude(point1, point2):
     # Calculate the Euclidean distance (magnitude)
     return math.sqrt((abs(point2[0] - point1[0]))**2 + (abs(point2[1] - point1[1]))**2)
 
+def get_lane_offset(start, end, offset):
+    # Calculate direction vector
+    direction = (end[0] - start[0], end[1] - start[1])
+    # Perpendicular vector
+    perpendicular = (-direction[1], direction[0])
+    # Normalize
+    magnitude = math.sqrt(perpendicular[0]**2 + perpendicular[1]**2)
+    normalized_perpendicular = (perpendicular[0] / magnitude, perpendicular[1] / magnitude)
+    # Apply offset
+    return (normalized_perpendicular[0] * offset, normalized_perpendicular[1] * offset)
+
 class Road:
-    def __init__(self, start_pos, end_pos, width=10):
+    def __init__(self, start_pos, end_pos, reverse=False, width=2):
         self.start_pos = start_pos
         self.end_pos = end_pos
+        self.reverse = reverse
         self.width = width
         self.road_image = road_image.convert_alpha()  # Ensure the image has alpha transparency
 
@@ -87,10 +99,18 @@ class Road:
 
 
 class Car:
-    def __init__(self, network, current_road, speed=2):
+    def __init__(self, network, current_road, speed=2, reverse=False):
         self.current_road = current_road
         self.speed = speed
+
         self.pos = current_road.start_pos
+        self.end_pos = current_road.end_pos
+
+        self.translated_pos = current_road.start_pos
+        self.translated_end_pos = current_road.end_pos
+
+        self.swap_lane(reverse)
+
         self.progress = 0  # 0 to 1, representing position along current road
         self.color = (255, 0, 0)  # Red car
         self.network = network
@@ -105,8 +125,8 @@ class Car:
     def draw(self, screen):
         #pygame.draw.ellipse(screen, self.color, (self.pos[0]-10, self.pos[1]-5, 20, 10))
          # Calculate the vector from the car's current position to the destination (end of the road)
-        start_x, start_y = self.pos
-        end_x, end_y = self.current_road.end_pos
+        start_x, start_y = self.translated_pos
+        end_x, end_y = self.translated_end_pos
 
         # Calculate the angle using atan2 (returns angle in radians)
         delta_x = end_x - start_x
@@ -125,7 +145,7 @@ class Car:
         screen.blit(rotated_image, new_rect.topleft)
 
     def update(self):
-        self.check_for_traffic()
+        #self.check_for_traffic()
 
         self.progress += self.speed / self.current_road.get_length()
         if self.progress >= 1:
@@ -133,12 +153,20 @@ class Car:
             self.switch_road()
             
         # Interpolate position
-        start_x, start_y = self.current_road.start_pos
-        end_x, end_y = self.current_road.end_pos
+        start_x, start_y = self.translated_pos
+        end_x, end_y = self.translated_end_pos
         self.pos = (
             start_x + (end_x - start_x) * self.progress,
             start_y + (end_y - start_y) * self.progress
         )
+    
+    def swap_lane(self, reverse=False):
+        self.lane_offset_multiplier = 20
+
+        self.lane_offset = get_lane_offset(self.pos, self.end_pos, self.lane_offset_multiplier)
+
+        self.translated_pos = (self.pos[0] + self.lane_offset[0], self.pos[1] + self.lane_offset[1])
+        self.translated_end_pos = (self.end_pos[0] + self.lane_offset[0], self.end_pos[1] + self.lane_offset[1])
     
     def switch_road(self):
         roads = self.network.get_road_list(self.network)
@@ -154,8 +182,12 @@ class Car:
             random_match_road = random.choice(match_roads)
             self.current_road = random_match_road
             self.pos = random_match_road.start_pos
+            self.end_pos = random_match_road.end_pos
+
+            self.swap_lane(random_match_road.reverse)
+
             self.progress = 0
-            self.check_nearby_cars()
+            #self.check_nearby_cars()
         
         if not match_road_found:
             pass
@@ -210,13 +242,3 @@ class Car:
             if elapsed_time >= 2:
                 self.speed = 2
                 self.start_time = None  # Reset timer after resuming
-
-
-class Building:
-    def __init__(self, x, y, width, height):
-        self.coord = pygame.Rect(x, y, width, height)
-        self.color = (72, 73, 74)
-    
-    def draw(self, screen):
-        pygame.draw.rect(screen, self.color, self.coord)
-

@@ -132,6 +132,6 @@ class FractalGenerator:
         return self.convert_pixel_matrix_to_symbol_matrix(img)
 
 
-if __name__ == "__main__":
+""" if __name__ == "__main__":
     fractal_generator = FractalGenerator(x = -0.37, i = 0.6,height = 60, width = 60)
-    print(fractal_generator.generate_fractal().generate_pixel_coord_mapper())
+    print(fractal_generator.generate_fractal().generate_pixel_coord_mapper()) """

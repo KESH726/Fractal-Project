@@ -1,0 +1,7 @@
+London 32
+Dublin 47
+Vancouver 35
+Milan 33
+Marseille 31
+Tokyo 30
+Eindhoven 29

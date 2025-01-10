@@ -1,11 +1,10 @@
 import random
 
-from .entities import Road, Car, Building, calculate_magnitude, nature_images
+from .entities import Road, Car, calculate_magnitude, nature_images
 
 class RoadNetwork:
     _car_list = []
     _road_list = []
-    _building_list = []
     _nature_list = []
     _cars_left = 0
 
@@ -81,7 +80,7 @@ class RoadNetwork:
         for road_coordinate in self.roads_coordinates:
             #print(road_coordinate)
             new_road = Road((road_coordinate[0]),(road_coordinate[1]))
-            new_reverse_road = Road((road_coordinate[1]),(road_coordinate[0]))
+            new_reverse_road = Road((road_coordinate[1]),(road_coordinate[0]), reverse=True)
             
             # Only add roads to the network with a valid length (not 0)
             if new_road.get_length() != 0:
@@ -89,26 +88,23 @@ class RoadNetwork:
                 RoadNetwork._road_list.append(new_reverse_road)
 
     def create_cars(self):
-        for road in self._road_list:
+        for i in range(self._cars_left):
+            reverseDirection = False
+
             if self._cars_left <= 0:
                 break
 
-            new_car = Car(RoadNetwork, road, 2)
-            RoadNetwork._car_list.append(new_car)
-            self._cars_left -= 1
-            print("ADDED ONE CAR")
+            road = random.choice(self._road_list)
 
-    
-    def create_buildings(self, building_count):
-        for i in range(building_count):
-            boundary_px = 60
-            random_x = random.randint(0+boundary_px,800-boundary_px)
-            random_y = random.randint(0+boundary_px,800-boundary_px)
-            random_width = random.randint(10,20)
-            random_height = random.randint(10,20)
-            new_building = Building(random_x, random_y, random_width, random_height)
-            RoadNetwork._building_list.append(new_building)
-    
+            if road.reverse: 
+                reverseDirection = True            
+
+            new_car = Car(RoadNetwork, road, 2, reverseDirection)
+            RoadNetwork._car_list.append(new_car)
+
+
+            self._cars_left -= 1
+
     def create_nature(self, nature_count, map_width, map_height):
         new_coordinates = []
 
@@ -136,8 +132,6 @@ class RoadNetwork:
         for car in RoadNetwork._car_list:
             car.update()
             car.draw(screen)
-        for building in RoadNetwork._building_list:
-            building.draw(screen)
         for nature_obj in RoadNetwork._nature_list:
             # Draw the nature image at its position
             screen.blit(nature_obj["image"], nature_obj["position"])
@@ -147,6 +141,3 @@ class RoadNetwork:
     
     def get_road_list(self):
         return self._road_list
-    
-    def get_building_list(self):
-        return self._building_list

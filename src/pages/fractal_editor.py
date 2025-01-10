@@ -5,6 +5,7 @@ from PIL import Image, ImageTk
 
 from src.citysimulation import city
 from src.services.FractalGenerator import FractalGenerator
+from collections import defaultdict
 
 fractal_generator = FractalGenerator()
 
@@ -49,7 +50,43 @@ def fractal_editor(root, frame):
         fractal_generator.set_i(value)
         update_canvas()
     
+
+    def group_coordinates_by_proximity(coordinates, threshold):
+        def distance(coord1, coord2):
+            """Calculate Euclidean distance between two coordinates."""
+            return ((coord1[0] - coord2[0])**2 + (coord1[1] - coord2[1])**2)**0.5
+
+        groups = []
+        for coord in coordinates:
+            added = False
+            for group in groups:
+                if distance(coord, group['center']) <= threshold:
+                    group['points'].append(coord)
+                    group['center'] = (
+                        sum(p[0] for p in group['points']) / len(group['points']),
+                        sum(p[1] for p in group['points']) / len(group['points'])
+                    )
+                    added = True
+                    break
+            if not added:
+                groups.append({'points': [coord], 'center': coord})
+
+        # Extract the centers of each group
+        return [group['center'] for group in groups]
+
+
     def start_city():
+        coord_dict = fractal_generator.generate_pixel_coord_mapper()
+        star_corods = coord_dict.get("*")
+        underscore_coords = coord_dict.get("_")
+
+        coordinates = star_corods + underscore_coords
+
+        group_range_threshold = 80
+        coordinates = group_coordinates_by_proximity(coordinates, group_range_threshold)
+
+        print("COORDINATES: ", coordinates)
+
         segments, cars, stoplights = int(seg_len.get()), int(num_cars.get()), int(num_stoplights.get())
         root.destroy()
         city.init_city(
@@ -57,7 +94,8 @@ def fractal_editor(root, frame):
             720, 
             segments,
             cars,
-            stoplights
+            stoplights,
+            coordinates
         )
 
     # Update the canvas for the first time
