@@ -1,3 +1,5 @@
+from src.services import FractalGenerator
+
 """ road_coordinates = [
     # Horizontal Roads
     ((50, 100), (250, 100)),
