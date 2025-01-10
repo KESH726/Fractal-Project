@@ -218,11 +218,9 @@ class Car:
             # Check if car is within range
             if calculate_magnitude(self.pos, car.pos) <= self.range:
                 difference = (self.progress - car.progress)
-                print("YO THERE'S A CAR ON MY ROAD AND THERES THIS DIFFERENCE ", difference)
                 if difference < 0:  # A car is close enough
                     if self.speed != 0:  
                         self.stop_start_time = time.time()
-                    print("CAR IN RANGE")
                     self.stop_counter += 1
                     self.speed = 0
                     car_in_range = True

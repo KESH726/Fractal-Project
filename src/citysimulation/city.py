@@ -1,13 +1,14 @@
 import pygame
 import time
+import os
+import math
 
 from .assetloader import load_image
 from .road_network import RoadNetwork
 
-import setup_context
+from setup_context import setup_context
 from src.tkreact import create_app
 from src.pages import leaderboards
-
 
 def save_simulation_results(network: RoadNetwork):
     dti = []  # List to store delay percentages
@@ -15,7 +16,6 @@ def save_simulation_results(network: RoadNetwork):
     # Get the list of cars from the network
     car_list = network.get_car_list()
 
-    # Iterate over each car in the network
     for car in car_list:
         # Get the current time (end time)
         end_time = time.time()
@@ -27,22 +27,33 @@ def save_simulation_results(network: RoadNetwork):
         traffic_time = car.traffic_time
 
         # Calculate the delay percentage (total delay time / total time * 100)
-        if total_time > 0:  # Avoid division by zero
+        if total_time > 0:  
             delay_percentage = (traffic_time / total_time) * 100
         else:
-            delay_percentage = 0  # If no time has passed, delay is 0%
+            delay_percentage = 0  
 
         # Append the calculated delay percentage to the list
         dti.append(delay_percentage)
 
-        # Optionally, you can print or log the result for debugging purposes
-        print(f"Car ID: {car.id} - Total Time: {total_time:.2f} seconds - Delay Time: {traffic_time:.2f} seconds - Delay Percentage: {delay_percentage:.2f}%")
-
     # Calculate and return the average of the delay percentages
-    if dti:  # Make sure the list is not empty
+    if dti: 
         average_dti = sum(dti) / len(dti)
     else:
         average_dti = 0  # If there are no cars, return 0
+
+    # Prepare the data to write to the file
+    creation_time_str = time.strftime("%H:%M", time.localtime(time.time()))  # Current time as "23:34" format
+    name = f"\nFractal{creation_time_str}"
+
+    # Prepare the string to save
+    data_to_write = f"{name} {math.ceil(average_dti)}"
+
+    root_dir = os.curdir
+    data_dir = os.path.join(root_dir, "data")
+
+    # Write the data to the file
+    with open(os.path.join(data_dir, "savedata.txt"), "a") as file:
+        file.write(data_to_write)
     
     return average_dti
 
@@ -103,20 +114,6 @@ def init_city(width, height, segments, cars, stoplights, coordinates):
                 pygame.quit()
 
                 save_simulation_results(my_city)
-
-                # When the user quits the simulation
-                # open the app again, and open the leaderboards page
-                # Initialise app context
-                setup_context()
-
-                # Initialise tkinter & run app
-                create_app(
-                    title="Recursive graphics project",
-                    window_size="960x600",
-                    appearance="dark",
-                    theme="dark-blue",
-                    homepage=leaderboards
-                )
                 return
             elif event.type == pygame.VIDEORESIZE:  # Handle resize events
                 screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
